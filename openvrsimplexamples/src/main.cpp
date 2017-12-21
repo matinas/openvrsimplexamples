@@ -1,73 +1,80 @@
-#include <iostream>
-#include <iomanip> // setprecision
-#include <sstream> // stringstream
-
+#include <vector>
 #include <openvr.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
 
+#include "utils.h"
+
 using namespace std;
-using namespace vr;
 
 // OpenVR variables 
-HmdError err;
-IVRSystem* vr_context;
+vr::IVRSystem* vr_context;
 
 // SDL variables 
-SDL_Event event;
 SDL_Window* window;
-SDL_Renderer* renderer;
-SDL_Texture* solidTexture;
-SDL_Color textColor = { 0, 0, 0, 255 };
-SDL_Rect solidRect;
 SDL_Rect windowRect = { 900, 300, 400, 400 };
-
 TTF_Font* font;
 
 // app variables
 bool app_end = false;
-float counter = 0;
+string driver_name, driver_serial;
+string tracked_device_type[vr::k_unMaxTrackedDeviceCount];
+vr::TrackedDevicePose_t tracked_device_pose[vr::k_unMaxTrackedDeviceCount];
 
+// app functions
 int init_SDL();
-void print_text(TTF_Font*, const char*, SDL_Color, int, int);
-string ftos(float f); // float to string with 2-decimal precision
+int init_OpenVR();
+void process_vr_event(const vr::VREvent_t & event);
+void exit();
 
 int main(int argv, char** args) {
 
 	if (init_SDL() != 0) return -1;
-
-	//if (VR_IsHmdPresent())
-	//{
-	//	cout << "An HMD was successfully found in the system" << endl;
-
-	//	if (VR_IsRuntimeInstalled()) {
-	//		const char* runtime_path = VR_RuntimePath();
-	//		cout << "Runtime correctly installed at '" << runtime_path << "'" << endl;
-	//	}
-	//	else
-	//	{
-	//		cout << "Runtime was not found, quitting app" << endl;
-	//		return -1;
-	//	}
-	//}
-	//else
-	//{
-	//	cout << "No HMD was found in the system, quitting app" << endl;
-	//	return -1;
-	//}
-
-	//// Load the SteamVR Runtime
-	//vr_context = VR_Init(&err,EVRApplicationType::VRApplication_Scene);
-	//vr_context == NULL ? cout << "Error while initializing SteamVR runtime. Error code is " << VR_GetVRInitErrorAsSymbol(err) << endl : cout << "SteamVR runtime successfully initialized" << endl;
+	if (init_OpenVR() != 0) return -1;
 
 	while (!app_end)
 	{
 		SDL_RenderClear(renderer);
 
+		print_text(font, ("Driver name: " + driver_name).c_str(), black_color, 10, 10);
+		print_text(font, ("Driver serial ID: " + driver_serial).c_str(), black_color, 10, 40);
+				
+		if (vr_context != NULL)
+		{
+			// Process SteamVR events
+			vr::VREvent_t vr_event;
+			while(vr_context->PollNextEvent(&vr_event,sizeof(vr_event)))
+			{
+				process_vr_event(vr_event);
+			}
+
+			// Obtain tracking device poses
+			vr_context->GetDeviceToAbsoluteTrackingPose(vr::ETrackingUniverseOrigin::TrackingUniverseStanding,0,tracked_device_pose,vr::k_unMaxTrackedDeviceCount);
+
+			int actual_y = 110, tracked_device_count = 0;
+			for (int nDevice=0; nDevice<vr::k_unMaxTrackedDeviceCount; nDevice++)
+			{
+				if ((tracked_device_pose[nDevice].bDeviceIsConnected) && (tracked_device_pose[nDevice].bPoseIsValid))
+				{
+					print_text(font, ("Tracked device #" + ftos((float) nDevice,0) + " (" + tracked_device_type[nDevice] + ")").c_str(), green_color, 10, actual_y);
+
+					float v[3] = { tracked_device_pose[nDevice].mDeviceToAbsoluteTracking.m[0][3], tracked_device_pose[nDevice].mDeviceToAbsoluteTracking.m[1][3], tracked_device_pose[nDevice].mDeviceToAbsoluteTracking.m[2][3]} ;
+
+					print_text(font, vftos(v,2).c_str(), green_color, 50, actual_y+25);
+					actual_y += 60;
+
+					tracked_device_count++;
+				}
+			}
+
+			print_text(font, ("Tracked devices: " + ftos((float) tracked_device_count,0)).c_str(), black_color, 10, 70);
+		}
+
+		SDL_RenderPresent(renderer);
+
+		SDL_Event event;
 		while (SDL_PollEvent(&event))
 		{
-			cout << "entro" << endl;
-
 			switch (event.type)
 			{
 			case SDL_KEYDOWN:
@@ -75,52 +82,148 @@ int main(int argv, char** args) {
 					if (event.key.keysym.sym == SDLK_ESCAPE)
 					{
 						cout << "Exiting app..." << endl;
-
-						VR_Shutdown();
-						SDL_Quit();
+						
 						app_end = true;
-					}
-					else if (event.key.keysym.sym == SDLK_SPACE)
-					{
-						counter+=0.123f;
 					}
 				}
 
 				break;
 			}
 		}
-
-		print_text(font, "Device count: 0", textColor, 10, 10);
-		print_text(font, ("Tracked devices: " + ftos(counter)).c_str(), textColor, 10, 40);
-		
-		SDL_RenderPresent(renderer);
 	}
 
-	TTF_CloseFont(font);
+	exit();
 
 	return 0;
 }
 
-string ftos(float f)
+//-----------------------------------------------------------------------------
+// Purpose: Processes a single VR event
+//-----------------------------------------------------------------------------
+void process_vr_event(const vr::VREvent_t & event)
 {
-	stringstream stream;
-	stream << fixed << setprecision(2) << f;
-	string f_str = stream.str();
+	string str_td_class = GetTrackedDeviceClassString(vr_context->GetTrackedDeviceClass(event.trackedDeviceIndex));
 
-	return f_str;
+	switch(event.eventType)
+	{
+	case vr::VREvent_TrackedDeviceActivated:
+		{
+			cout << "Device " << event.trackedDeviceIndex << " attached (" << str_td_class << ")" << endl;
+			tracked_device_type[event.trackedDeviceIndex] = str_td_class;
+		}
+		break;
+	case vr::VREvent_TrackedDeviceDeactivated:
+		{
+			cout << "Device " << event.trackedDeviceIndex << " detached (" << str_td_class << ")" << endl;
+			tracked_device_type[event.trackedDeviceIndex] = "";
+		}
+		break;
+	case vr::VREvent_TrackedDeviceUpdated:
+		{
+			cout << "Device " << event.trackedDeviceIndex << " updated (" << str_td_class << ")" << endl;
+		}
+		break;
+	case vr::VREvent_ButtonPress:
+		{
+			vr::VREvent_Controller_t controller_data = event.data.controller;
+			cout << "Pressed button " << vr_context->GetButtonIdNameFromEnum((vr::EVRButtonId) controller_data.button) << " of device " << event.trackedDeviceIndex << " (" << str_td_class << ")" << endl;
+
+			// Another way of accessing the state of the controller...
+			vr::VRControllerState_t controller_state;
+			vr::TrackedDevicePose_t td_pose;
+			if (vr_context->GetControllerStateWithPose(vr::ETrackingUniverseOrigin::TrackingUniverseStanding,event.trackedDeviceIndex,&controller_state,sizeof(controller_state),&td_pose)) {
+				if ((vr::ButtonMaskFromId(vr::EVRButtonId::k_EButton_Axis1) & controller_state.ulButtonPressed) != 0) {
+					cout << "Trigger button pressed!" << endl;
+					cout << "Pose information" << endl;
+					cout << "  Tracking result: " << td_pose.eTrackingResult << endl;
+					cout << "  Tracking velocity: (" << td_pose.vVelocity.v[0] << "," << td_pose.vVelocity.v[1] << "," << td_pose.vVelocity.v[2] << ")" << endl;
+				}
+			}
+		}
+		break;
+	case vr::VREvent_ButtonUnpress:
+		{
+			vr::VREvent_Controller_t controller_data = event.data.controller;
+			cout << "Unpressed button " << vr_context->GetButtonIdNameFromEnum((vr::EVRButtonId) controller_data.button) << " of device " << event.trackedDeviceIndex << " (" << str_td_class << ")" << endl;
+		}
+		break;
+	case vr::VREvent_ButtonTouch:
+		{
+			vr::VREvent_Controller_t controller_data = event.data.controller;
+			cout << "Touched button " << vr_context->GetButtonIdNameFromEnum((vr::EVRButtonId) controller_data.button) << " of device " << event.trackedDeviceIndex << " (" << str_td_class << ")" << endl;
+		}
+		break;
+	case vr::VREvent_ButtonUntouch:
+		{
+			vr::VREvent_Controller_t controller_data = event.data.controller;
+			cout << "Untouched button " << vr_context->GetButtonIdNameFromEnum((vr::EVRButtonId) controller_data.button) << " of device " << event.trackedDeviceIndex << " (" << str_td_class << ")" << endl;
+		}
+		break;
+	}
 }
 
-void print_text(TTF_Font* font, const char* text, SDL_Color color, int posX, int posY)
+int init_OpenVR()
 {
-	SDL_Surface* solid = TTF_RenderText_Solid(font, text, color);
-	solidTexture = SDL_CreateTextureFromSurface(renderer, solid);
-	SDL_QueryTexture(solidTexture, NULL, NULL, &solidRect.w, &solidRect.h);
-	solidRect.x = posX;
-	solidRect.y = posY;
+	if (vr::VR_IsHmdPresent())
+	{
+		cout << "An HMD was successfully found in the system" << endl;
 
-	SDL_RenderCopy(renderer, solidTexture, NULL, &solidRect);
-	SDL_DestroyTexture(solidTexture);
-	SDL_FreeSurface(solid);
+		if (vr::VR_IsRuntimeInstalled()) {
+			const char* runtime_path = vr::VR_RuntimePath();
+			cout << "Runtime correctly installed at '" << runtime_path << "'" << endl;
+		}
+		else
+		{
+			cout << "Runtime was not found, quitting app" << endl;
+			return -1;
+		}
+	}
+	else
+	{
+		cout << "No HMD was found in the system, quitting app" << endl;
+		return -1;
+	}
+
+	// Load the SteamVR Runtime
+	vr::HmdError err;
+	vr_context = vr::VR_Init(&err,vr::EVRApplicationType::VRApplication_Scene);
+	vr_context == NULL ? cout << "Error while initializing SteamVR runtime. Error code is " << vr::VR_GetVRInitErrorAsSymbol(err) << endl : cout << "SteamVR runtime successfully initialized" << endl;
+
+	int base_stations_count = 0;
+	for (uint32_t td=vr::k_unTrackedDeviceIndex_Hmd; td<vr::k_unMaxTrackedDeviceCount; td++) {
+
+		if (vr_context->IsTrackedDeviceConnected(td))
+		{
+			vr::ETrackedDeviceClass tracked_device_class = vr_context->GetTrackedDeviceClass(td);
+
+			string td_type = GetTrackedDeviceClassString(tracked_device_class);
+			tracked_device_type[td] = td_type;
+
+			cout << "Tracking device " << td << " is connected " << endl;
+			cout << "  Device type: " << td_type << ". Name: " << GetTrackedDeviceString(vr_context,td,vr::Prop_TrackingSystemName_String) << endl;
+
+			if (tracked_device_class == vr::ETrackedDeviceClass::TrackedDeviceClass_TrackingReference) base_stations_count++;
+
+			if (td == vr::k_unTrackedDeviceIndex_Hmd)
+			{
+				// Fill variables used for obtaining the device name and serial ID (used later for naming the SDL window)
+				driver_name = GetTrackedDeviceString(vr_context,vr::k_unTrackedDeviceIndex_Hmd,vr::Prop_TrackingSystemName_String);
+				driver_serial = GetTrackedDeviceString(vr_context,vr::k_unTrackedDeviceIndex_Hmd,vr::Prop_SerialNumber_String);
+			}
+		}
+		else
+			cout << "Tracking device " << td << " not connected" << endl;
+	}
+
+	// Check whether both base stations are found
+	if (base_stations_count < 2)
+	{
+		cout << "There was a problem indentifying the base stations, please check they are powered on" << endl;
+
+		return -1;
+	}
+
+	return 0;
 }
 
 int init_SDL()
@@ -133,7 +236,7 @@ int init_SDL()
 		return -1;
 	}
 
-	window = SDL_CreateWindow("OpenVR examples", windowRect.x, windowRect.y, windowRect.w, windowRect.h, 0); // Seems that if we don't initialize a windows SDL's event subsystem doesn't work
+	window = SDL_CreateWindow("Simple OpenVR example", windowRect.x, windowRect.y, windowRect.w, windowRect.h, 0); // Seems that if we don't initialize a windows SDL's event subsystem doesn't work
 	if (window == NULL)
 	{
 		SDL_Log("Unable to create SDL Window: %s", SDL_GetError());
@@ -176,4 +279,13 @@ int init_SDL()
 	SDL_Log("SDL successfully initialized");
 
 	return 0;
+}
+
+void exit()
+{
+	vr::VR_Shutdown();
+
+	TTF_CloseFont(font);
+	SDL_DestroyRenderer(renderer);
+	SDL_Quit();
 }
