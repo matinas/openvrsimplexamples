@@ -1,2 +1,2 @@
 # openvrsimplexamples
-Simple OpenVR examples done for the OpenVR tutorial series on the Skarred Ghost Virtual Reality blog
+Simple OpenVR tracking example using the HTC Vive as part of the OpenVR tutorials on The Ghost Howls Virtual Reality blog: https://skarredghost.com/
