@@ -11,13 +11,16 @@
 
 using namespace std;
 
-SDL_Color black_color = { 0, 0, 0, 255 };
-SDL_Color green_color = { 0, 200, 0, 255 };
-SDL_Renderer* renderer;
+// SDL variables
+extern SDL_Window* window;
+extern SDL_Rect windowRect;
+extern TTF_Font* font;
+extern SDL_Renderer* renderer;
+extern SDL_Color black, green, blue;
 
-void print_text(TTF_Font*, const char*, SDL_Color, int, int);
-string ftos(float f, int precision); // float to string with 2-decimal precision
-string vftos(float* v, int precision); // float vector to string with 2-decimal precisions
+void print_text(const char*, SDL_Color, int, int);
+string ftos(float f, int precision);	// float to string with 2-decimal precision
+string vftos(float* v, int precision);	// float vector to string with 2-decimal precisions
 string GetTrackedDeviceString(vr::IVRSystem*, vr::TrackedDeviceIndex_t, vr::TrackedDeviceProperty, vr::TrackedPropertyError *peError = NULL);
 string GetTrackedDeviceClassString(vr::ETrackedDeviceClass td_class);
 

@@ -1,7 +1,14 @@
 #include "utils.h"
 
+SDL_Window* window;
+SDL_Renderer* renderer = NULL;
+TTF_Font* font;
+
+SDL_Rect windowRect = { 900, 300, 480, 480 };
+SDL_Color black = { 0, 0, 0, 255 }, green = { 0, 200, 0, 255 }, blue = { 0, 0, 200, 255 };
+
 //-----------------------------------------------------------------------------
-// Purpose: Helper to get a string from a tracked device property and turn it
+// Purpose: helper to get a string from a tracked device property and turn it
 //			into a std::string
 //-----------------------------------------------------------------------------
 string GetTrackedDeviceString(vr::IVRSystem *pHmd, vr::TrackedDeviceIndex_t unDevice, vr::TrackedDeviceProperty prop, vr::TrackedPropertyError *peError)
@@ -14,11 +21,12 @@ string GetTrackedDeviceString(vr::IVRSystem *pHmd, vr::TrackedDeviceIndex_t unDe
 	requiredBufferLen = pHmd->GetStringTrackedDeviceProperty(unDevice,prop,pchBuffer,requiredBufferLen,peError);
 	string sResult = pchBuffer;
 	delete[] pchBuffer;
+
 	return sResult;
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Helper to get a string from a tracked device type class
+// Purpose: helper to get a string from a tracked device type class
 //-----------------------------------------------------------------------------
 string GetTrackedDeviceClassString(vr::ETrackedDeviceClass td_class) {
 
@@ -49,6 +57,9 @@ string GetTrackedDeviceClassString(vr::ETrackedDeviceClass td_class) {
 	return str_td_class;
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: helper to convert an 3-float array into a vector string
+//-----------------------------------------------------------------------------
 string vftos(float v[3], int precision)
 {
 	stringstream stream;
@@ -58,6 +69,9 @@ string vftos(float v[3], int precision)
 	return f_str;
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: helper to convert an float into a string
+//-----------------------------------------------------------------------------
 string ftos(float f, int precision)
 {
 	stringstream stream;
@@ -67,7 +81,11 @@ string ftos(float f, int precision)
 	return f_str;
 }
 
-void print_text(TTF_Font* font, const char* text, SDL_Color color, int posX, int posY)
+//-----------------------------------------------------------------------------
+// Purpose: helper to print some text on screen given the text to be printed,
+//			the	color and the screen position
+//-----------------------------------------------------------------------------
+void print_text(const char* text, SDL_Color color, int posX, int posY)
 {
 	SDL_Surface* solid = TTF_RenderText_Solid(font, text, color);
 	SDL_Texture* text_texture = SDL_CreateTextureFromSurface(renderer, solid);
