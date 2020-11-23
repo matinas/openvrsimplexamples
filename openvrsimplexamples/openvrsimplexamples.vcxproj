@@ -73,6 +73,11 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>$(ProjectDir)..\thirdparty\openvr\lib\win32\openvr_api.lib;$(ProjectDir)..\thirdparty\sdl2-2.0.3\bin\win32\SDL2.lib;$(ProjectDir)..\thirdparty\sdl2-2.0.3\bin\win32\SDL2_static.lib;$(ProjectDir)..\thirdparty\sdl2-2.0.3\bin\win32\SDL2main.lib;$(ProjectDir)..\thirdparty\sdl2_ttf-2.0.14\lib\x86\SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /Y "$(ProjectDir)..\thirdparty\sdl2_ttf-2.0.14\lib\x86\*.dll" "$(OutDir)"
+copy /Y "$(ProjectDir)..\thirdparty\sdl2-2.0.3\bin\win32\*.dll" "$(OutDir)"
+copy /Y "$(ProjectDir)..\thirdparty\openvr\bin\win32\*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -95,9 +100,9 @@
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(SolutionDir)\thirdparty\sdl2_ttf-2.0.14\lib\x86\*.dll" "$(OutDir)"
-copy /Y "$(SolutionDir)\thirdparty\sdl2-2.0.3\bin\win32\*.dll" "$(OutDir)"
-copy /Y "$(SolutionDir)\thirdparty\openvr\bin\win32\*.dll" "$(OutDir)"</Command>
+      <Command>copy /Y "$(ProjectDir)..\thirdparty\sdl2_ttf-2.0.14\lib\x86\*.dll" "$(OutDir)"
+copy /Y "$(ProjectDir)..\thirdparty\sdl2-2.0.3\bin\win32\*.dll" "$(OutDir)"
+copy /Y "$(ProjectDir)..\thirdparty\openvr\bin\win32\*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
