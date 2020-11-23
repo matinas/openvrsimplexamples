@@ -21,19 +21,19 @@
     <ProjectGuid>{AA7C3F03-1386-4856-8F6E-38672A296D42}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>PruebasOpenVR</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -51,7 +51,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(MSBuildStartupDirectory)\thirdparty\sdl2_ttf-2.0.14\include;$(MSBuildStartupDirectory)\thirdparty\sdl2-2.0.3\include;$(MSBuildStartupDirectory)\thirdparty\openvr\headers;$(MSBuildProjectDirectory)\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)..\thirdparty\sdl2_ttf-2.0.14\include;$(ProjectDir)..\thirdparty\sdl2-2.0.3\include;$(ProjectDir)..\thirdparty\openvr\headers;$(ProjectDir)include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -71,7 +71,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(MSBuildStartupDirectory)\thirdparty\openvr\lib\win32\openvr_api.lib;$(MSBuildStartupDirectory)\thirdparty\sdl2-2.0.3\bin\win32\SDL2.lib;$(MSBuildStartupDirectory)\thirdparty\sdl2-2.0.3\bin\win32\SDL2_static.lib;$(MSBuildStartupDirectory)\thirdparty\sdl2-2.0.3\bin\win32\SDL2main.lib;$(MSBuildStartupDirectory)\thirdparty\sdl2_ttf-2.0.14\lib\x86\SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ProjectDir)..\thirdparty\openvr\lib\win32\openvr_api.lib;$(ProjectDir)..\thirdparty\sdl2-2.0.3\bin\win32\SDL2.lib;$(ProjectDir)..\thirdparty\sdl2-2.0.3\bin\win32\SDL2_static.lib;$(ProjectDir)..\thirdparty\sdl2-2.0.3\bin\win32\SDL2main.lib;$(ProjectDir)..\thirdparty\sdl2_ttf-2.0.14\lib\x86\SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
