@@ -27,3 +27,5 @@
 obj
 /*.sdf
 bin
+
+.vs/
