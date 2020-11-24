@@ -28,6 +28,5 @@ obj
 /*.sdf
 bin
 
-.vs/
-Debug/
-openvrsimplexamples/Release/
+# Visual Studio generated
+.vs
