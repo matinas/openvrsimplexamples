@@ -224,7 +224,8 @@ int init_OpenVR()
 	{
 		cout << "There was a problem indentifying the base stations, please check they are powered on" << endl;
 
-		return -1;
+		//return -1;
+		// I'm not using base stations for now, so continue after error.
 	}
 
 	return 0;

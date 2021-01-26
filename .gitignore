@@ -27,3 +27,6 @@
 obj
 /*.sdf
 bin
+
+# Visual Studio generated
+.vs

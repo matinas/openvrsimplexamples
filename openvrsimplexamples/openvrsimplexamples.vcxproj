@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -21,18 +21,19 @@
     <ProjectGuid>{AA7C3F03-1386-4856-8F6E-38672A296D42}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>PruebasOpenVR</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -50,13 +51,17 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)\thirdparty\sdl2_ttf-2.0.14\include;$(SolutionDir)\thirdparty\sdl2-2.0.3\include;$(SolutionDir)\thirdparty\openvr\headers;$(ProjectDir)include;$(IncludePath)</IncludePath>
+    <OutDir>bin\$(Configuration)</OutDir>
+    <IntDir>obj\$(Configuration)</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>bin/$(Configuration)/</OutDir>
-    <IntDir>obj/$(Configuration)/</IntDir>
-    <ReferencePath>$(VCInstallDir)atlmfc\lib;$(VCInstallDir)lib</ReferencePath>
-    <LibraryPath>$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSDK_LibraryPath_x86);</LibraryPath>
+    <OutDir>bin\$(Configuration)</OutDir>
+    <IntDir>obj\$(Configuration)</IntDir>
+    <ReferencePath>$(VC_ReferencesPath_x86);</ReferencePath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
+    <IncludePath>$(SolutionDir)\thirdparty\sdl2_ttf-2.0.14\include;$(SolutionDir)\thirdparty\sdl2-2.0.3\include;$(SolutionDir)\thirdparty\openvr\headers;$(ProjectDir)include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -69,7 +74,14 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(SolutionDir)\thirdparty\openvr\lib\win32\openvr_api.lib;$(SolutionDir)\thirdparty\sdl2-2.0.3\bin\win32\SDL2.lib;$(SolutionDir)\thirdparty\sdl2-2.0.3\bin\win32\SDL2_static.lib;$(SolutionDir)\thirdparty\sdl2-2.0.3\bin\win32\SDL2main.lib;$(SolutionDir)\thirdparty\sdl2_ttf-2.0.14\lib\x86\SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>
+        copy /Y "$(SolutionDir)\thirdparty\sdl2_ttf-2.0.14\lib\x86\*.dll" "$(OutDir)"
+        copy /Y "$(SolutionDir)\thirdparty\sdl2-2.0.3\bin\win32\*.dll" "$(OutDir)"
+        copy /Y "$(SolutionDir)\thirdparty\openvr\bin\win32\*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -92,9 +104,10 @@
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(SolutionDir)\thirdparty\sdl2_ttf-2.0.14\lib\x86\*.dll" "$(OutDir)"
-copy /Y "$(SolutionDir)\thirdparty\sdl2-2.0.3\bin\win32\*.dll" "$(OutDir)"
-copy /Y "$(SolutionDir)\thirdparty\openvr\bin\win32\*.dll" "$(OutDir)"</Command>
+      <Command>
+        copy /Y "$(SolutionDir)\thirdparty\sdl2_ttf-2.0.14\lib\x86\*.dll" "$(OutDir)"
+        copy /Y "$(SolutionDir)\thirdparty\sdl2-2.0.3\bin\win32\*.dll" "$(OutDir)"
+        copy /Y "$(SolutionDir)\thirdparty\openvr\bin\win32\*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
